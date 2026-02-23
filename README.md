@@ -3,7 +3,7 @@
 ### based in a course on EducationIT
 
 
-#### Reject in local
+#### Reject in local!
 
 ```bash
 python3 -m venv .venv
