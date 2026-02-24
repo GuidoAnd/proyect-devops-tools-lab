@@ -1,0 +1,72 @@
+- name: Deploy Orders Api
+  hosts: api
+  become: true
+  
+  tasks:
+    - name: Update packages
+      apt:
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Install dependencies
+      package:
+        name:
+          - python3
+          - python3-pip
+          - python3-venv
+          - git
+        state: present
+    - name: Make a App dir
+      file:
+        path: /opt/api
+        state: directory
+        mode: '0755'
+        owner: "{{ ansible_user }}"
+    - name: Copy App
+      copy:
+          src: ../App/main.py
+          dest: /opt/api/main.py
+          mode: '0644'
+          owner: "{{ ansible_user }}"
+          group: "{{ ansible_user }}" 
+    - name: Copy App dependencies
+      copy:    
+          src: ../requirements.txt
+          dest: /opt/api/requirements.txt
+          mode: '0644'
+          owner: "{{ ansible_user }}"
+          group: "{{ ansible_user }}" 
+    - name: Make a env
+      command: python3 -m venv /opt/api/.venv
+      args:
+        creates: /opt/api/.venv/bin/activate
+    - name: Install App dependencies
+      pip:
+        requirements: /opt/api/requirements.txt
+        virtualenv: /opt/api/.venv
+    - name: Launch App in a service
+      copy:
+        content: |
+          [Unit]
+          Description=Orders Api service
+          After=network.target
+
+          [Service]
+          Type=simple
+          User={{ ansible_user }}
+          WorkingDirectory=/opt/api
+          ExecStart=/opt/api/.venv/bin/python3 /opt/api/main.py
+          Restart=always
+          RestartSec=10
+
+          [Install]
+          WantedBy=multi-user.target
+        dest: /etc/systemd/system/orders-api.service
+    - name: Recargar systemd
+      systemd:
+        daemon_reload: yes
+    - name: habilitar servicio
+      systemd:
+        name: orders-api
+        enabled: yes
+        state: started 
