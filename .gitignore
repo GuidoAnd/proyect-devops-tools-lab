@@ -1,5 +1,7 @@
-.PEM
+*.pem
 .venv/
 __pycache__/
 *.pyc
 .env
+guide.txt
+PEM/
