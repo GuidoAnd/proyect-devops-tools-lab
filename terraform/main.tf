@@ -18,16 +18,7 @@ resource "aws_security_group" "ejemplo_iac" {
     name        = "ejemplo-iac-sg"
     description = "Security group para ejemplo IAC"
     vpc_id      = data.aws_vpc.default.id
-
-    ingress {
-        description = "SSH access"
-        from_port = 22
-        to_port = 22
-        protocol = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
-        
-    }
-
+    
     egress {
         from_port = 0
         to_port = 0
@@ -41,14 +32,33 @@ resource "aws_security_group" "ejemplo_iac" {
 
 }
 
+#resource for adding ingress rules.
+resource "aws_vpc_security_group_ingress_rule" "allow_ssh_ipv4" {
+  security_group_id = aws_security_group.ejemplo_iac.id
+  cidr_ipv4         =  "0.0.0.0/0"
+  from_port         = 22
+  ip_protocol       = "tcp"
+  to_port           = 22   
+}
+
+resource "aws_vpc_security_group_ingress_rule" "allow_http_ipv4" {
+  security_group_id = aws_security_group.ejemplo_iac.id
+  cidr_ipv4         =  "0.0.0.0/0"
+  from_port         = 8000
+  ip_protocol       = "tcp"
+  to_port           = 8000
+}
+
+
+
 # Instancia EC2
 resource "aws_instance" "ejmeplo" {
-    ami = "ami-0ecb62995f68bb549"
+    ami = "ami-0136735c2bb5cf5bf"
     instance_type = "t3.micro"
     subnet_id = data.aws_subnet.default.id
 
     vpc_security_group_ids = [aws_security_group.ejemplo_iac.id]
-
+    key_name = "projectGAws"
 
     #Configuracion IMSV2 requerido
     metadata_options {
