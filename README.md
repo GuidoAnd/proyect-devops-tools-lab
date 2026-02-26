@@ -1,6 +1,6 @@
-## Proyect DevOps Testing Tools 
+## Proyect DevOps - Testing Tools 
 
-### based in a course on EducationIT
+### Based in a course on EducationIT
 
 
 #### Reject in local!
