@@ -5,7 +5,7 @@ data "aws_vpc" "default" {
 
 data "aws_subnet" "default" {
     vpc_id            = data.aws_vpc.default.id
-    availability_zone = "us-east-1a" 
+    availability_zone = var.availability_zone 
     
     filter {
       name = "default-for-az"
@@ -15,7 +15,7 @@ data "aws_subnet" "default" {
 
 # Security group para la instancia
 resource "aws_security_group" "ejemplo_iac" {
-    name        = "ejemplo-iac-sg"
+    name        = var.sg_name
     description = "Security group para ejemplo IAC"
     vpc_id      = data.aws_vpc.default.id
     
@@ -23,11 +23,11 @@ resource "aws_security_group" "ejemplo_iac" {
         from_port = 0
         to_port = 0
         protocol = "-1"
-        cidr_blocks = ["0.0.0.0/0"]
+        cidr_blocks = var.allowed_cidr_blocks
     }
 
     tags = {
-        Name = "ejemplo-aic-sg"
+        Name = var.sg_name
     }
 
 }
@@ -36,29 +36,29 @@ resource "aws_security_group" "ejemplo_iac" {
 resource "aws_vpc_security_group_ingress_rule" "allow_ssh_ipv4" {
   security_group_id = aws_security_group.ejemplo_iac.id
   cidr_ipv4         =  "0.0.0.0/0"
-  from_port         = 22
+  from_port         = var.allow_ssh
   ip_protocol       = "tcp"
-  to_port           = 22   
+  to_port           = var.allow_ssh   
 }
 
 resource "aws_vpc_security_group_ingress_rule" "allow_http_ipv4" {
   security_group_id = aws_security_group.ejemplo_iac.id
   cidr_ipv4         =  "0.0.0.0/0"
-  from_port         = 8000
+  from_port         = var.allow_http
   ip_protocol       = "tcp"
-  to_port           = 8000
+  to_port           = var.allow_http
 }
 
 
 
 # Instancia EC2
 resource "aws_instance" "ejmeplo" {
-    ami = "ami-0136735c2bb5cf5bf"
-    instance_type = "t3.micro"
+    ami = var.ami
+    instance_type = var.instance_type
     subnet_id = data.aws_subnet.default.id
 
     vpc_security_group_ids = [aws_security_group.ejemplo_iac.id]
-    key_name = "projectGAws"
+    key_name = var.key_a
 
     #Configuracion IMSV2 requerido
     metadata_options {
@@ -69,8 +69,8 @@ resource "aws_instance" "ejmeplo" {
 
 
     tags = {
-        Name        = "ejemplo-iac-instance"
-        Environment = "testing"
+        Name        = "${var.environment}-ejemplo-iac-instance"
+        Environment = var.environment
         ManagedBy   = "terraform"    
     }   
 }
