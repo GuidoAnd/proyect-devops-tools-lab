@@ -1,0 +1,15 @@
+*.pem
+.venv/
+__pycache__/
+*.pyc
+.env
+guide.txt
+PEM/
+*.lock.hcl
+.terraform/
+*.tfvars
+ansible/
+terraform/
+tests/
+README.md
+.gitignore

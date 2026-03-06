@@ -1,0 +1,36 @@
+## Install depedencies 
+FROM python:3.12.12-slim AS builder
+
+WORKDIR /app
+
+# Install needed system dependencies 
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy depedencies
+COPY requirements.txt .
+
+# Install depdendecies
+RUN pip install --no-cache-dir --user -r requirements.txt 
+
+## Runtime: optimized image
+
+FROM python:3.12.12-slim AS runner
+
+WORKDIR /app
+
+# Copy only the installed depedencies from builder
+COPY --from=builder /root/.local /root/.local
+
+# Linked dependecies directory in Linux PATH
+ENV PATH=/root/.local/bin:$PATH
+
+# Copy only a code of app
+COPY App/ app/
+
+# Expose ports
+EXPOSE 8000
+
+# Mutable command
+CMD ["python", "app/main.py"]
