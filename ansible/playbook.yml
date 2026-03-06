@@ -24,7 +24,7 @@
         owner: "{{ ansible_user }}"
     - name: Copy App
       copy:
-          src: ../App/main.py
+          src: ../app/main.py
           dest: /opt/api/main.py
           mode: '0644'
           owner: "{{ ansible_user }}"

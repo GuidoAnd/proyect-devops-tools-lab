@@ -27,7 +27,7 @@ COPY --from=builder /root/.local /root/.local
 ENV PATH=/root/.local/bin:$PATH
 
 # Copy only a code of app
-COPY App/ app/
+COPY app/ app/
 
 # Expose ports
 EXPOSE 8000
