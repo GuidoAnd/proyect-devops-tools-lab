@@ -1,11 +1,19 @@
 services:
-  orders-api: # Copy image on Aws repository
-    image: id.dkr.ecr.us-east-1.amazonaws.com/[tag]/test:multistage
-    ports:
-     - 8000:8000
-  orders-api-2:
+  #  orders-api: # Copy image on Aws repository
+  #    image: 025889067332.dkr.ecr.us-east-1.amazonaws.com/gproyects/test:multistage
+  #    environment:
+  #      - ENV_TYPE=development
+  #    env_file:
+  #      - .env
+  #    ports:
+  #     - 8000:8000
+   orders-api-2:
     build:          #Building a image with a dockerfile
       context: .    #path where is the dockerfile
       dockerfile:  Dockerfile.multistage
+    environment:
+        - ENV_TYPE=development
+    env_file:
+        - .env
     ports:
       - 8010:8000
