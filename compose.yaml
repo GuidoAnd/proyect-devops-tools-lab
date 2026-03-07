@@ -1,6 +1,6 @@
 services:
   #  orders-api: # Copy image on Aws repository
-  #    image: 025889067332.dkr.ecr.us-east-1.amazonaws.com/gproyects/test:multistage
+  #    image: id.dkr.ecr.us-east-1.amazonaws.com/[]/test:multistage
   #    environment:
   #      - ENV_TYPE=development
   #    env_file:
