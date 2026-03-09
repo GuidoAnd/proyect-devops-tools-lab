@@ -8,3 +8,4 @@ PEM/
 *.lock.hcl
 .terraform/
 *.tfvars
+k8s/my-app/
