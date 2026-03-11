@@ -1,6 +1,15 @@
 pipeline {
     agent any
 
+    environment {
+            AWS_REGION = 'us-east-1'
+            IMAGE = 'test:latest'
+            AWS_ACCOUNT_ID = '025889067332'
+            REPO_GH = 'https://github.com/GuidoAnd/proyect-devops-tools-lab.git'
+            BRANCH_TARGET_NAME = 'master'
+
+
+    }
     stages {
         
         stage('Clean WS') {
@@ -10,38 +19,36 @@ pipeline {
         }
         stage('Checkout') {
             steps {
-                git branch: 'master',
-                    url: 'https://github.com/GuidoAnd/proyect-devops-tools-lab.git'
+                git branch: "${BRANCH_TARGET_NAME}",
+                    url: "${REPO_GH}"
             }
         }
-        stage('Build Image')
-        {
+        stage('Build Image') {
             steps {
                 sh """
-                docker build . -t 025889067332.dkr.ecr.us-east-1.amazonaws.com/gproyects/test:latest  
+                docker build . -t ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/gproyects/${IMAGE}  
                 """
              }
         }
         stage('Tests'){
             steps {
                 sh """
-                docker run --rm 025889067332.dkr.ecr.us-east-1.amazonaws.com/gproyects/test:latest pytest test
+                docker run --rm ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/gproyects/${IMAGE} pytest test
                 """
             }
         }
         stage('Login to ECR'){
             steps {
                 sh """
-                aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 025889067332.dkr.ecr.us-east-1.amazonaws.com
+                aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
                 
                 """
             }
         }
-        stage('Push Image')
-        {
+        stage('Push Image') {
             steps {
                 sh """
-                docker push 025889067332.dkr.ecr.us-east-1.amazonaws.com/gproyects/test:latest   
+                docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/gproyects/${IMAGE}  
                 """
              }
         }
