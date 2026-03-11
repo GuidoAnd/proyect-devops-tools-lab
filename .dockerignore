@@ -10,7 +10,6 @@ PEM/
 *.tfvars
 ansible/
 terraform/
-tests/
 README.md
 .gitignore
 k8s/
