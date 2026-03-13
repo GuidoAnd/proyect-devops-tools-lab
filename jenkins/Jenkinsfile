@@ -7,7 +7,7 @@ pipeline {
             AWS_ACCOUNT_ID = '025889067332'
             REPO_GH = 'https://github.com/GuidoAnd/proyect-devops-tools-lab.git'
             BRANCH_TARGET_NAME = 'master'
-
+            
 
     }
     stages {
