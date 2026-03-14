@@ -10,7 +10,8 @@ pipeline {
             BRANCH_TARGET_NAME = 'master'
             ECR_URL = '025889067332.dkr.ecr.us-east-1.amazonaws.com/gproyects/test'
             FULL_IMAGE = "${ECR_URL}:${IMAGE_TAG}"
-            GH_PUSH_URL = 'github.com/GuidoAnd/proyect-devops-tools-lab.git'
+            GH_PUSH_URL_HELM = 'github.com/GuidoAnd/proyect-devops-tools-lab-helm.git'
+            BRANCH_HELM = 'main'
     }
     stages {
         
@@ -66,7 +67,7 @@ pipeline {
                                 git commit -m "Update image tag to ${IMAGE_TAG}"
 
                                 # Usamos las variables que jenkins genera automaticamente para la app
-                                git push https://${GIT_USERNAME}:${GIT_PASSWORD}@${GH_PUSH_URL} ${BRANCH_TARGET_NAME}
+                                git push https://${GIT_USERNAME}:${GIT_PASSWORD}@${GH_PUSH_URL_HELM} ${BRANCH_HELM}
                             """   
                                 }   
                             }
