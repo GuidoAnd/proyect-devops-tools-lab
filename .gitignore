@@ -10,3 +10,4 @@ PEM/
 *.tfvars
 k8s/my-app/
 old.*
+argocd/
