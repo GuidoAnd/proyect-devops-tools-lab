@@ -53,7 +53,7 @@ pipeline {
 
                         sh """
                             rm -rf helm-repo
-                            git clone ${HELM_REPO}
+                            git clone ${HELM_REPO} helm-repo                            
                         """
                                            
                         dir('helm-repo') {
