@@ -62,7 +62,7 @@ pipeline {
                             sh """
                                 git config user.email "jenkins@ordersgh17.com"
                                 git config user.name "Jenkins CI"
-                                git add k8s/orders-api-helm/values.yaml
+                                git add values.yaml
                                 git commit -m "Update image tag to ${IMAGE_TAG}"
 
                                 # Usamos las variables que jenkins genera automaticamente para la app
