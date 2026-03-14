@@ -9,3 +9,4 @@ PEM/
 .terraform/
 *.tfvars
 k8s/my-app/
+old.*

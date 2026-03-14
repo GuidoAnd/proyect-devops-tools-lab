@@ -3,12 +3,13 @@ pipeline {
 
     environment {
             AWS_REGION = 'us-east-1'
-            IMAGE = 'test:latest'
+            IMAGE_TAG = "${BUILD_NUMBER}"
             AWS_ACCOUNT_ID = '025889067332'
             REPO_GH = 'https://github.com/GuidoAnd/proyect-devops-tools-lab.git'
             BRANCH_TARGET_NAME = 'master'
-            
-
+            ECR_URL = '025889067332.dkr.ecr.us-east-1.amazonaws.com/gproyects/test'
+            FULL_IMAGE = "${ECR_URL}:${IMAGE_TAG}"
+            GH_PUSH_URL = 'github.com/GuidoAnd/proyect-devops-tools-lab.git'
     }
     stages {
         
@@ -25,34 +26,45 @@ pipeline {
         }
         stage('Build Image') {
             steps {
-                sh """
-                docker build . -t ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/gproyects/${IMAGE}  
-                """
+                sh "docker build . -t ${FULL_IMAGE} -t ${ECR_URL}:latest"
              }
         }
         stage('Tests'){
             steps {
-                sh """
-                docker run --rm ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/gproyects/${IMAGE} pytest test
-                """
+                sh "docker run --rm ${FULL_IMAGE} pytest test"
             }
         }
-        stage('Login to ECR'){
+        stage('Login & push to ECR'){
             steps {
                 sh """
                 aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
-                
+                docker push ${FULL_IMAGE}
+                docker push ${ECR_URL}:latest
                 """
             }
         }
-        stage('Push Image') {
+        stage('Update Helm Values') {
             steps {
-                sh """
-                docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/gproyects/${IMAGE}  
-                """
-             }
+                withCredentials([usernamePassword(credentialsId: 'github-app-test',
+                                 passwordVariable: 'GIT_PASSWORD',
+                                 usernameVariable: 'GIT_USERNAME')]) {
+                    script {
+                        sh "sed -i 's/tag: .*/tag: \"${IMAGE_TAG}\"/' k8s/orders-api-helm/values.yaml"
+                        
+                        sh """
+                            git config user.email "jenkins@ordersgh17.com"
+                            git config user.name "Jenkins CI"
+                            git add k8s/orders-api-helm/values.yaml
+                            git commit -m "Update image tag to ${IMAGE_TAG}"
+
+                            # Usamos las variables que jenkins genera automaticamente para la app
+                            git push https://${GIT_USERNAME}:${GIT_PASSWORD}@${GH_PUSH_URL} ${BRANCH_TARGET_NAME}
+                        """      
+                            }
+                        }
+               
+            }
         }
         
     }
 }
-
