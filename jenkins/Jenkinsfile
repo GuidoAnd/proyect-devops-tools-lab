@@ -6,6 +6,7 @@ pipeline {
             IMAGE_TAG = "${BUILD_NUMBER}"
             AWS_ACCOUNT_ID = '025889067332'
             REPO_GH = 'https://github.com/GuidoAnd/proyect-devops-tools-lab.git'
+            HELM_REPO = 'https://github.com/GuidoAnd/proyect-devops-tools-lab-helm.git'
             BRANCH_TARGET_NAME = 'master'
             ECR_URL = '025889067332.dkr.ecr.us-east-1.amazonaws.com/gproyects/test'
             FULL_IMAGE = "${ECR_URL}:${IMAGE_TAG}"
@@ -49,22 +50,30 @@ pipeline {
                                  passwordVariable: 'GIT_PASSWORD',
                                  usernameVariable: 'GIT_USERNAME')]) {
                     script {
-                        sh "sed -i 's/tag: .*/tag: \"${IMAGE_TAG}\"/' k8s/orders-api-helm/values.yaml"
-                        
-                        sh """
-                            git config user.email "jenkins@ordersgh17.com"
-                            git config user.name "Jenkins CI"
-                            git add k8s/orders-api-helm/values.yaml
-                            git commit -m "Update image tag to ${IMAGE_TAG}"
 
-                            # Usamos las variables que jenkins genera automaticamente para la app
-                            git push https://${GIT_USERNAME}:${GIT_PASSWORD}@${GH_PUSH_URL} ${BRANCH_TARGET_NAME}
-                        """      
+                        sh """
+                            rm -rf helm-repo
+                            git clone ${HELM_REPO}
+                        """
+                                           
+                        dir('helm-repo') {
+                            sh "sed -i 's/tag: .*/tag: \"${IMAGE_TAG}\"/' values.yaml"
+
+                            sh """
+                                git config user.email "jenkins@ordersgh17.com"
+                                git config user.name "Jenkins CI"
+                                git add k8s/orders-api-helm/values.yaml
+                                git commit -m "Update image tag to ${IMAGE_TAG}"
+
+                                # Usamos las variables que jenkins genera automaticamente para la app
+                                git push https://${GIT_USERNAME}:${GIT_PASSWORD}@${GH_PUSH_URL} ${BRANCH_TARGET_NAME}
+                            """   
+                                }   
                             }
                         }
-               
+
+                 }
             }
-        }
         
     }
 }
