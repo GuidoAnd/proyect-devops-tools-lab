@@ -58,7 +58,7 @@ pipeline {
         stage('Build Image') {
             steps {
                 sh """
-                    docker buildx build --platform linux/amd64, linux/arm64 \
+                    docker buildx build --platform linux/amd64,linux/arm64 \
                     -t ${FULL_IMAGE} \
                     -t ${ECR_URL}:latest \
                     --push .
