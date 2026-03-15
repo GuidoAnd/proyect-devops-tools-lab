@@ -26,25 +26,46 @@ pipeline {
                     url: "${REPO_GH}"
             }
         }
-        stage('Build Image') {
-            steps {
-                sh "docker build . -t ${FULL_IMAGE} -t ${ECR_URL}:latest"
-             }
-        }
-        stage('Tests'){
-            steps {
-                sh "docker run --rm ${FULL_IMAGE} pytest test"
-            }
-        }
-        stage('Login & push to ECR'){
+
+        stage('Setup Buildx') {
             steps {
                 sh """
-                aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
-                docker push ${FULL_IMAGE}
-                docker push ${ECR_URL}:latest
+                docker run --rm --privileged multiarch/qemu-user-static --reset -p yes || true
+                docker buildx create --name multiarch-builder --use || docker buildx use multiarch-builder
+                docker buildx inspect --bootstrap
                 """
             }
         }
+
+        stage('Build Image for Test') {
+            steps {
+                sh "docker build . -t ${FULL_IMAGE}-test"                
+            }
+        }
+
+        stage('Tests'){
+            steps {
+                sh "docker run --rm ${FULL_IMAGE}-test pytest test"
+            }
+        }        
+
+        stage('Login to ECR'){
+            steps {
+                sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"           
+            }
+        }
+        
+        stage('Build Image') {
+            steps {
+                sh """
+                    docker buildx build --platform linux/amd64, linux/arm64 \
+                    -t ${FULL_IMAGE} \
+                    -t ${ECR_URL}:latest \
+                    --push .
+                    """
+             }
+        }
+
         stage('Update Helm Values') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'github-app-test',
