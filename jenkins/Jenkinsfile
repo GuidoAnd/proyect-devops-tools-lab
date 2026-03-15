@@ -13,9 +13,8 @@ pipeline {
             GH_PUSH_URL_HELM = 'github.com/GuidoAnd/proyect-devops-tools-lab-helm.git'
             BRANCH_HELM = 'main'
     }
-    
-    stages {
-        
+
+    stages {        
         stage('Clean WS') {
             steps {
                 deleteDir()
@@ -52,7 +51,9 @@ pipeline {
 
         stage('Login to ECR'){
             steps {
-                sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"           
+                sh """
+                aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+                """           
             }
         }
         
